@@ -1,0 +1,211 @@
+# Shell CircleCI 2.1 configuration file
+version: 2.1
+orbs:
+  build-tools: circleci/build-tools@2.9.1
+commands:
+  deploy:
+    description: command to deploy
+    parameters:
+      release_env:
+        type: string
+        default: "prod"
+
+    steps:
+      - attach_workspace:
+          at: ~/tmp
+      - run:
+          name: upload to zeno
+          command: |
+            cd ~/tmp/repo
+            ZENO_ENV=<< parameters.release_env >>
+            URL=`echo $zeno | ZENO_ENV="$ZENO_ENV" jq -r '.[env.ZENO_ENV] | .url'`
+            USERNAME=`echo $zeno | ZENO_ENV="$ZENO_ENV" jq -r '.[env.ZENO_ENV] | .username'`
+            PASSWORD=`echo $zeno | ZENO_ENV="$ZENO_ENV" jq -r '.[env.ZENO_ENV] | .password'`
+            ENDPOINT="https://$URL/api/v1/dist/internal/create"
+
+            FILETAR='robot_scripts.tar.gz'
+            VERSION=`cat VERSION`
+            echo $ENDPOINT
+            echo $FILETAR
+            echo "Uploading generated APK ..."
+            PROXY_ADDRESS="-x $proxy"
+            if [[ $ZENO_ENV != 'cn-test' && $ZENO_ENV != 'cn-dev' && $ZENO_ENV != 'cn' &&  $ZENO_ENV != 'wanda' ]]; then
+                 PROXY_ADDRESS=''
+            fi
+            curl  $PROXY_ADDRESS            \
+                  --user $USERNAME:$PASSWORD \
+                  --form service=robot-scripts \
+                  --form version="$VERSION" \
+                  --form system=generic \
+                  --form platform=generic \
+                  --form level=0 \
+                  --form local_file=@$FILETAR $ENDPOINT
+
+jobs:
+  build:
+    docker:
+      - image: cimg/base:2020.01
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          command: |
+            /bin/bash .build/overwrite_versions.sh
+            ls operation.sh
+            files=`cat TARFILES`
+            mkdir ~/robot_scripts
+            cp -r $files -t ~/robot_scripts
+            tar -czvf robot_scripts.tar.gz -C ~/ robot_scripts
+            mkdir ~/tmp
+            cp -r ~/repo ~/tmp/
+      - persist_to_workspace:
+          root: ~/tmp
+          paths:
+            - repo/
+
+  deploy-cn:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: cn
+
+  deploy-cn-dev:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: cn-dev
+
+  deploy-cn-test:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: cn-test
+
+  deploy-wanda:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: wanda
+
+  deploy-dev:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: dev
+
+  deploy-test:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: test
+
+  deploy-prod:
+    docker:
+      - image: cimg/base:2020.01
+    steps:
+      - deploy:
+          release_env: prod
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build:
+          context: turing_zeno
+          filters:
+            branches:
+              only:
+                - /.*/
+            tags:
+              only:
+                - /release-.*/
+
+      - deploy-approval-cn:
+          type: approval
+          requires:
+            - build
+          filters: &triggerBuild
+            branches:
+              only:
+                - /.*master/
+            tags:
+              only:
+                - /release-.*/
+      - deploy-cn:
+          context: turing_zeno
+          requires:
+            - deploy-approval-cn
+          filters: *triggerBuild
+
+      - deploy-approval-cn-dev:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-cn-dev:
+          context: turing_zeno
+          requires:
+            - deploy-approval-cn-dev
+          filters: *triggerBuild
+
+      - deploy-approval-cn-test:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-cn-test:
+          context: turing_zeno
+          requires:
+            - deploy-approval-cn-test
+          filters: *triggerBuild
+
+      - deploy-approval-wanda:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-wanda:
+          context: turing_zeno
+          requires:
+            - deploy-approval-wanda
+          filters: *triggerBuild
+
+      - deploy-approval-dev:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-dev:
+          context: turing_zeno
+          requires:
+            - deploy-approval-dev
+          filters: *triggerBuild
+
+      - deploy-approval-test:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-test:
+          context: turing_zeno
+          requires:
+            - deploy-approval-test
+          filters: *triggerBuild
+
+      - deploy-approval-prod:
+          type: approval
+          requires:
+            - build
+          filters: *triggerBuild
+      - deploy-prod:
+          context: turing_zeno
+          requires:
+            - deploy-approval-prod
+          filters: *triggerBuild

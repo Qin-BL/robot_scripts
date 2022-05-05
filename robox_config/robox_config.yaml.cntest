@@ -1,0 +1,8 @@
+ENV: cn-test
+_ENV_CONFIG:
+    web_domain: 'test-robot.turingvideo.cn'
+    gw_domain: 'test-robot.turingvideo.cn'
+    ws_domain: 'test-robot.turingvideo.cn'
+    wisp_endpoint: 'wss://wisp.turingvideo.cn:443/wisp?token=%s'
+    stats_id_suffix: '-cn-test'
+    

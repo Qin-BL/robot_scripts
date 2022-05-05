@@ -1,0 +1,8 @@
+ENV: robot-demo
+_ENV_CONFIG:
+    web_domain: 'robot-demo.turingvideo.com'
+    gw_domain: 'robot-demo.turingvideo.com'
+    ws_domain: 'robot-demo.turingvideo.com'
+    wisp_endpoint: 'wss://wisp.turingvideo.com:443/wisp?token=%s'
+    stats_id_suffix: '-robot-demo'
+    

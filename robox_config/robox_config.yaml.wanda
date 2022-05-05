@@ -1,0 +1,8 @@
+ENV: wanda
+_ENV_CONFIG:
+    web_domain: 'wanda-gw.turingvideo.cn'
+    gw_domain: 'wanda-gw.turingvideo.cn'
+    ws_domain: 'wanda-gw.turingvideo.cn'
+    wisp_endpoint: 'wss://wisp.turingvideo.cn:443/wisp?token=%s'
+    stats_id_suffix: '-wanda'
+    

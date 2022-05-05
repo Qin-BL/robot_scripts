@@ -1,0 +1,7 @@
+ext {
+    // Package version
+    versionMajor = 0
+    versionMinor = 35
+    versionPatch = 1
+    versionClassifier = "dev"
+}

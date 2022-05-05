@@ -1,0 +1,8 @@
+ENV: cn-dev
+_ENV_CONFIG:
+    web_domain: 'dev-gw.turingvideo.cn'
+    gw_domain: 'dev-gw.turingvideo.cn'
+    ws_domain: 'dev-gw.turingvideo.cn'
+    wisp_endpoint: 'wss://wisp.turingvideo.cn:443/wisp?token=%s'
+    stats_id_suffix: '-cn-dev'
+    

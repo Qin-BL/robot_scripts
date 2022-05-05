@@ -1,0 +1,1 @@
+{"database_endpoint":"wss://test-config.turingvideo.com/channel/robot","wisp_endpoint":"wss://test-wisp.turingvideo.com:443/wisp?token=%s"}

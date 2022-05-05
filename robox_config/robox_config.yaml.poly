@@ -1,0 +1,8 @@
+ENV: poly
+_ENV_CONFIG:
+    web_domain: 'poly.turingvideo.cn'
+    gw_domain: 'poly.turingvideo.cn'
+    ws_domain: 'poly.turingvideo.cn'
+    wisp_endpoint: 'wss://wisp.turingvideo.cn:443/wisp?token=%s'
+    stats_id_suffix: '-poly'
+    

@@ -1,0 +1,8 @@
+ENV: test
+_ENV_CONFIG:
+    web_domain: 'test-gw.turingvideo.com'
+    gw_domain: 'test-gw.turingvideo.com'
+    ws_domain: 'test-gw.turingvideo.com'
+    wisp_endpoint: 'wss://test-wisp.turingvideo.com:443/wisp?token=%s'
+    stats_id_suffix: '-test'
+    
